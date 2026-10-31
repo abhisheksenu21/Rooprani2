@@ -2259,3 +2259,15 @@ export async function getAllCatalogueForSupabaseSync() {
     return { categories: [], products: [] };
   }
 }
+
+export async function updateProductImageUrlsInPostgres(id: number, imageUrls: string[]) {
+  if (!hasPostgresConfig() || id <= 0) return;
+  try {
+    await db
+      .update(products)
+      .set({ imageUrls, updatedAt: new Date() })
+      .where(eq(products.id, id));
+  } catch (error) {
+    console.warn('Non-fatal updateProductImageUrlsInPostgres warning:', error);
+  }
+}

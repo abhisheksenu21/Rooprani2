@@ -303,28 +303,24 @@ export async function syncOrderToSupabase(
     ]);
 
     if (ordersRes.error && enquiriesRes.error) {
-      // Fallback plain insert when anon RLS allows INSERT but not UPDATE on upsert
+      // Fallback plain insert when anon RLS allows INSERT (with minimal return) without SELECT/UPDATE
       const [plainOrder, plainEnq] = await Promise.all([
-        client
-          .from('orders')
-          .insert({
-            local_enquiry_id: payload.localEnquiryId,
-            user_uid: payload.userUid,
-            auth_user_id: isUuid ? payload.supabaseUserId : null,
-            product_id: payload.productId,
-            product_title: payload.productName,
-            product_price_inr: payload.productPriceInr,
-            product_sku: payload.productSku,
-            customer_name: payload.customerName,
-            customer_phone: payload.customerPhone,
-            customer_email: payload.customerEmail.toLowerCase().trim(),
-            preferred_size: payload.preferredSize,
-            notes: payload.notes,
-            status: payload.status || 'new',
-            created_at: createdIso,
-          })
-          .select('id')
-          .maybeSingle(),
+        client.from('orders').insert({
+          local_enquiry_id: payload.localEnquiryId,
+          user_uid: payload.userUid,
+          auth_user_id: isUuid ? payload.supabaseUserId : null,
+          product_id: payload.productId,
+          product_title: payload.productName,
+          product_price_inr: payload.productPriceInr,
+          product_sku: payload.productSku,
+          customer_name: payload.customerName,
+          customer_phone: payload.customerPhone,
+          customer_email: payload.customerEmail.toLowerCase().trim(),
+          preferred_size: payload.preferredSize,
+          notes: payload.notes,
+          status: payload.status || 'new',
+          created_at: createdIso,
+        }),
         client.from('enquiries').insert({
           local_enquiry_id: payload.localEnquiryId,
           user_uid: payload.userUid,
@@ -352,13 +348,13 @@ export async function syncOrderToSupabase(
 
       return {
         synced: true,
-        orderId: typeof plainOrder.data?.id === 'number' ? plainOrder.data.id : undefined,
+        orderId: payload.localEnquiryId,
       };
     }
 
     return {
       synced: true,
-      orderId: typeof ordersRes.data?.id === 'number' ? ordersRes.data.id : undefined,
+      orderId: typeof ordersRes.data?.id === 'number' ? ordersRes.data.id : payload.localEnquiryId,
     };
   } catch (err) {
     return {
@@ -602,18 +598,9 @@ async function checkTableExists(tableName: string): Promise<boolean> {
 
 async function checkStorageBucketReady(): Promise<boolean> {
   try {
-    const apiKey = hasSupabaseServiceRoleKey()
-      ? SERVER_SUPABASE_SERVICE_ROLE_KEY
-      : SERVER_SUPABASE_KEY;
-    const res = await fetch(`${SERVER_SUPABASE_URL}/storage/v1/bucket/product-images`, {
-      headers: {
-        apikey: apiKey,
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
-    if (!res.ok) return false;
-    const payload = (await res.json().catch(() => null)) as { id?: string } | null;
-    return payload?.id === 'product-images';
+    const client = createPrivilegedSupabaseClient();
+    const listRes = await client.storage.from('product-images').list('catalogue', { limit: 1 });
+    return !listRes.error;
   } catch {
     return false;
   }

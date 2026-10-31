@@ -42,12 +42,10 @@ function formatShortDate(iso: string): string {
   }
 }
 
-const VERCEL_ENV_TEMPLATE = `SUPABASE_URL=https://gszzzhfzysxtjncmbkjc.supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_VWVwWVIi7WrHY6TOs_DSaA_vKpUMinh
-VITE_SUPABASE_URL=https://gszzzhfzysxtjncmbkjc.supabase.co
+const VERCEL_ENV_TEMPLATE = `VITE_SUPABASE_URL=https://gszzzhfzysxtjncmbkjc.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_VWVwWVIi7WrHY6TOs_DSaA_vKpUMinh
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_secret_key
-DATABASE_URL=postgresql://postgres.gszzzhfzysxtjncmbkjc:[YOUR-DB-PASSWORD]@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://gszzzhfzysxtjncmbkjc.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_VWVwWVIi7WrHY6TOs_DSaA_vKpUMinh
 SESSION_SECRET=rooprani_production_hmac_secret_2026_secure`;
 
 export function AdminOverviewPage() {

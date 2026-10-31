@@ -31,6 +31,7 @@ import {
   updateCategoryRecord,
   updateCustomerProfile,
   updateEnquiryStatusRecord,
+  updateProductImageUrlsInPostgres,
   updateProductRecord,
   upsertUserFromAuth,
 } from '../db/repository.ts';
@@ -821,6 +822,7 @@ export function createApiApp() {
         const p = row.product;
         const c = row.category;
         // Convert any PostgreSQL binary `/api/media/:id` URLs to Supabase Storage CDN URLs when syncing!
+        let migratedMediaCount = 0;
         const resolvedUrls: string[] = [];
         for (const imgUrl of p.imageUrls ?? []) {
           const mediaMatch = /^\/api\/media\/(\d+)$/.exec(imgUrl.trim());
@@ -835,11 +837,16 @@ export function createApiApp() {
               });
               if (uploaded.uploaded && uploaded.publicUrl) {
                 resolvedUrls.push(uploaded.publicUrl);
+                migratedMediaCount += 1;
                 continue;
               }
             }
           }
           resolvedUrls.push(imgUrl);
+        }
+
+        if (migratedMediaCount > 0) {
+          await updateProductImageUrlsInPostgres(p.id, resolvedUrls);
         }
 
         const ok = await syncProductToSupabase(
