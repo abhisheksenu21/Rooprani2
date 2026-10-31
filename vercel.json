@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "unset npm_config_cache_dir NPM_CONFIG_CACHE_DIR; npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/((?!api/|assets/|catalogue/|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

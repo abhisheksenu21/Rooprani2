@@ -1,0 +1,6 @@
+{
+  "name": "Rooprani — Luxury Indian Jewellery Catalogue",
+  "description": "Discover Rooprani's curated collection of artificial jewellery, handcrafted bangles, kade, Bentex temple jewellery, earrings, necklaces, and occasion accessories with direct WhatsApp enquiry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
